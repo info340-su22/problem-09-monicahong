@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -14,7 +14,27 @@ export default function TrackList({setAlertMessage}) { //setAlertMessage callbac
   const urlParams = useParams(); //get album from URL
 
   //YOUR CODE GOES HERE
-
+  useEffect(() => {
+    const url = TRACK_QUERY_TEMPLATE.replace('{collectionId}', urlParams.collectionId);
+    setIsQuerying(true);
+    fetch(url)
+      .then(function(response) {
+        const dataPromise = response.json();
+        return dataPromise;
+      })
+      .then(function(data) {
+        if (data.results.slice(1).length == 0) {
+          setAlertMessage("No tracks found for album.");
+        }
+        setTrackData(data.results.slice(1));
+      })
+      .catch(function(error){
+        setAlertMessage(error.message);
+      })
+      .then(function(){
+        setIsQuerying(false);
+      })
+  },[urlParams.collectionId, setAlertMessage])
 
   //for fun: allow for clicking to play preview audio!
   const togglePlayingPreview = (previewUrl) => {
